@@ -45,8 +45,8 @@ for i in range(10):
                 h = 150,
             )
         ),
-        od.RandomObjectPosition(),
-        od.RandomObjectRotation(angles = 360),
+        od.ObjectRandomPosition(),
+        od.ObjectRandomRotation(angles = 360),
         od.NonMaxSupression(0.0),
         od.GeneratePascalVoc(),
     ])

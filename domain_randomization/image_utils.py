@@ -80,7 +80,7 @@ def overlay_transparent(background: np.ndarray, overlay: np.ndarray, x: int, y: 
     overlay_image = overlay[..., :3]
     mask = overlay[..., 3:] / 255.0
 
-    background[y:y+h, x:x+w] = (1.0 - mask) * background[y:y+h, x:x+w] + mask * overlay_image
+    background[y:y+h, x:x+w, :3] = (1.0 - mask) * background[y:y+h, x:x+w, :3] + mask * overlay_image
 
     return background
 

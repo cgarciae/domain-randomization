@@ -55,9 +55,9 @@ class PascalVoc:
         self.xml_string = pvw.xml_string
 
     
-    def save(self, save_dir):
-        image_path = os.path.join(save_dir, self.name + ".png")
-        xml_path = os.path.join(save_dir, self.name + ".xml")
+    def save(self, save_dir, extension = "png"):
+        image_path = os.path.join(save_dir,  f"{self.name}.{extension}")
+        xml_path = os.path.join(save_dir,  f"{self.name}.xml")
 
         image = image_utils.inv_chanels(self.image)
         cv2.imwrite(image_path, image)

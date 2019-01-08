@@ -3,6 +3,7 @@ import cytoolz as cz
 import cv2
 import typing as tp
 import numpy as np
+from imgaug import augmenters as iaa
 
 import domain_randomization as dr
 from . import components
@@ -75,8 +76,109 @@ class Resize:
             
         return collection
 
+class RandomChannelMultiply:
 
-class RandomObjectPosition:
+    def __init__(self, objects = False, background = False):
+        self.objects = objects
+        self.background = background
+
+    def __call__(self, collection: dr.Collection = None) -> dr.Collection:
+        assert collection, "collection cannot be None"
+
+        augmenter: iaa.Augmenter = iaa.Multiply(mul = (0.075, 1.0), per_channel=True)
+
+        if self.objects:
+            for obj in collection.components_of(components.Object):
+                obj: components.Object
+
+                obj.image[..., :3] = augmenter.augment_image(obj.image[..., :3])
+
+        if self.background:
+            background = collection.first_component_of(components.Background)
+
+            background.image[..., :3] = augmenter.augment_image(background.image[..., :3])
+
+            
+        return collection
+
+class RandomRotation90:
+
+    def __init__(self, objects = False, background = False):
+        self.objects = objects
+        self.background = background
+        self.angles = [0, 90, 180, 270]
+
+    def __call__(self, collection: dr.Collection = None) -> dr.Collection:
+        assert collection, "collection cannot be None"
+
+        if self.objects:
+            for obj in collection.components_of(components.Object):
+                obj: components.Object
+                angle = np.random.choice(self.angles)
+                obj.image = dr.image_utils.rotate_bound(obj.image, angle)
+
+        if self.background:
+            background = collection.first_component_of(components.Background)
+            angle = np.random.choice(self.angles)
+            background.image = dr.image_utils.rotate_bound(background.image, angle)
+            
+
+            
+        return collection
+
+
+class RandomChannelInvert:
+
+    def __init__(self, objects = False, background = False):
+        self.objects = objects
+        self.background = background
+
+    def __call__(self, collection: dr.Collection = None) -> dr.Collection:
+        assert collection, "collection cannot be None"
+
+        augmenter: iaa.Augmenter = iaa.Invert(p = 0.5, per_channel = True)
+
+        if self.objects:
+            for obj in collection.components_of(components.Object):
+                obj: components.Object
+
+                obj.image[..., :3] = augmenter.augment_image(obj.image[..., :3])
+
+        if self.background:
+            background = collection.first_component_of(components.Background)
+
+            background.image[..., :3] = augmenter.augment_image(background.image[..., :3])
+
+            
+        return collection
+
+class ObjectRandomScale:
+
+    def __init__(self, scale = 1.0):
+
+        if not isinstance(scale, (list, tuple)):
+            scale = (scale, 1.0 / scale)
+            
+        self.min = min(scale)
+        self.max = max(scale)
+
+    def __call__(self, collection: dr.Collection = None) -> dr.Collection:
+        assert collection, "collection cannot be None"
+
+
+        for obj in collection.components_of(components.Object):
+            obj: components.Object
+
+            scale = np.random.uniform(low = self.min, high = self.max)
+
+            w = int(obj.image.shape[1] * scale)
+            h = int(obj.image.shape[0] * scale)
+
+            obj.image = cv2.resize(obj.image, (w, h))
+            
+        return collection
+
+class ObjectRandomPosition:
 
     def __call__(self, collection: dr.Collection = None) -> dr.Collection:
         assert collection, "collection cannot be None"
@@ -105,7 +207,7 @@ class RandomObjectPosition:
         return collection
 
 
-class RandomObjectRotation:
+class ObjectRandomRotation:
 
     def __init__(self, angles):
         if not hasattr(angles, "__iter__"):
