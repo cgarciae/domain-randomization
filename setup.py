@@ -5,7 +5,7 @@ import subprocess
 
 if __name__ == "__main__":
     
-    subprocess.call("pip install git+https://github.com/cgarciae/pascal-voc-writer")
+    subprocess.call("pip install git+https://github.com/cgarciae/pascal-voc-writter")
 
     setup(
         name = "domain_randomization",
