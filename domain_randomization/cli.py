@@ -7,9 +7,7 @@ from pypeln import process as pr
 from tqdm import tqdm
 import random
 
-from . import transforms as tr
-from . import object_detection as od
-from . import image_utils
+import domain_randomization as dr
 
 class API:
 
@@ -34,33 +32,33 @@ class API:
     ):
         
         # create transform
-        transform = tr.Compose([
-            od.RandomChannelMultiply(
+        transform = dr.Compose([
+            dr.RandomChannelMultiply(
                 objects = object_channel_multiply,
                 background = background_channel_multiply,
-            ) if object_channel_multiply or background_channel_multiply else tr.NoOp(),
-            od.RandomChannelInvert(
+            ) if object_channel_multiply or background_channel_multiply else dr.NoOp(),
+            dr.RandomChannelInvert(
                 objects = object_channel_invert,
                 background = background_channel_invert,
-            ) if object_channel_invert or background_channel_invert else tr.NoOp(),
-            od.Resize(
+            ) if object_channel_invert or background_channel_invert else dr.NoOp(),
+            dr.Resize(
                 objects = object_resize,
                 background = background_resize,
-            ) if object_resize or background_resize else tr.NoOp(),
-            od.RandomRotation90(
+            ) if object_resize or background_resize else dr.NoOp(),
+            dr.RandomRotation90(
                 background = background_rotate,
             ),
-            od.ObjectRandomPosition(),
-            od.ObjectRandomScale(
+            dr.ObjectRandomPosition(),
+            dr.ObjectRandomScale(
                 scale = object_scale,
-            ) if object_scale != 1.0 else tr.NoOp(),
-            od.ObjectRandomRotation(
+            ) if object_scale != 1.0 else dr.NoOp(),
+            dr.ObjectRandomRotation(
                 angles = rotation_angles,
-            ) if rotation_angles else tr.NoOp(),
-            od.NonMaxSupression(
+            ) if rotation_angles else dr.NoOp(),
+            dr.NonMaxSupression(
                 iou_threshold = iou_threshold,
             ),
-            od.GeneratePascalVoc(),
+            dr.GeneratePascalVoc(),
         ])
 
         # get iterables
@@ -84,7 +82,7 @@ class API:
             object_idxs = np.random.choice(all_object_idx, n_objs)
 
             object_images = [
-                image_utils.inv_chanels(cv2.imread(
+                dr.image_utils.inv_chanels(cv2.imread(
                     all_object_filepaths[i],
                     cv2.IMREAD_UNCHANGED,
                 ))
@@ -97,19 +95,19 @@ class API:
             ]
 
             background_idx = np.random.randint(len(all_background_filepaths))
-            background_image = image_utils.inv_chanels(cv2.imread(
+            background_image = dr.image_utils.inv_chanels(cv2.imread(
                 all_background_filepaths[background_idx],
                 cv2.IMREAD_UNCHANGED,
             ))
 
-            collection = od.create_collection(
+            collection = dr.create_collection(
                 background = background_image,
                 objects = list(zip(object_labels, object_images))
             )
 
             collection = transform(collection)
 
-            pascal_voc: od.PascalVoc = collection.first_component_of(od.PascalVoc)
+            pascal_voc: dr.PascalVoc = collection.first_component_of(dr.PascalVoc)
 
             pascal_voc.save(output_dir, extension = output_extension)
 
