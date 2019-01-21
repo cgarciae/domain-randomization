@@ -5,3 +5,4 @@ cytoolz
 numpy
 imgaug
 tqdm
+git+https://github.com/cgarciae/pascal-voc-writer
