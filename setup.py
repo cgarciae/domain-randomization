@@ -24,5 +24,5 @@ if __name__ == "__main__":
             'console_scripts': [
                 'domain-randomization = domain_randomization.cli:main'
             ],
-        }
+        },
     )

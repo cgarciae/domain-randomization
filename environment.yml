@@ -1,0 +1,6 @@
+name: domain-randomization
+
+dependencies:
+  - python=3.6
+  - opencv
+  - pillow

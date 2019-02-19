@@ -11,11 +11,8 @@ def rotate_bound(image, angle):
     # add alpha channel if not present
     if image.shape[2] < 4:
         image = np.concatenate(
-            [
-                image,
-                np.ones((image.shape[0], image.shape[1], 1), dtype = image.dtype) * 255
-            ],
-            axis = 2,
+            [image, np.ones((image.shape[0], image.shape[1], 1), dtype=image.dtype) * 255],
+            axis=2,
         )
 
     # grab the dimensions of the image and then determine the
@@ -43,14 +40,16 @@ def rotate_bound(image, angle):
 
     # perform the actual rotation and return the image
     return cv2.warpAffine(
-        image, M, (nW, nH),
+        image,
+        M,
+        (nW, nH),
         # dst_mat,
         # flags=cv2.INTER_LINEAR,
         # borderMode=cv2.BORDER_TRANSPARENT,
     )
 
 
-def overlay_transparent(background: np.ndarray, overlay: np.ndarray, x: int, y: int):
+def overlay_transparent(background: np.ndarray, overlay: np.ndarray, mask: np.ndarray, x: int, y: int):
 
     background_width = background.shape[1]
     background_height = background.shape[0]
@@ -63,30 +62,30 @@ def overlay_transparent(background: np.ndarray, overlay: np.ndarray, x: int, y: 
     if x + w > background_width:
         w = background_width - x
         overlay = overlay[:, :w]
+        mask = mask[:, :w]
 
     if y + h > background_height:
         h = background_height - y
         overlay = overlay[:h]
+        mask = mask[:h]
 
-    if overlay.shape[2] < 4:
-        overlay = np.concatenate(
-            [
-                overlay,
-                np.ones((overlay.shape[0], overlay.shape[1], 1), dtype = overlay.dtype) * 255
-            ],
-            axis = 2,
-        )
+    mask = mask / 255.0
 
-    overlay_image = overlay[..., :3]
-    mask = overlay[..., 3:] / 255.0
+    if mask.ndim < background.ndim:
+        mask = np.expand_dims(mask, axis=-1)
 
-    background[y:y+h, x:x+w, :3] = (1.0 - mask) * background[y:y+h, x:x+w, :3] + mask * overlay_image
+    if overlay.ndim < background.ndim:
+        overlay = np.expand_dims(overlay, axis=-1)
+
+    if background.ndim > 2 and background.shape[2] > 3:
+        background = background[..., :3]
+
+    background[y:y + h, x:x + w] = (1.0 - mask) * background[y:y + h, x:x + w] + mask * overlay
 
     return background
 
 
-
-def non_max_suppression(boxes: np.ndarray, scores: np.ndarray, iou_threshold: float) -> np.ndarray:	
+def non_max_suppression(boxes: np.ndarray, scores: np.ndarray, iou_threshold: float) -> np.ndarray:
     assert boxes.shape[0] == scores.shape[0]
     # bottom-left origin
     ys1 = boxes[:, 1]
@@ -104,20 +103,14 @@ def non_max_suppression(boxes: np.ndarray, scores: np.ndarray, iou_threshold: fl
         boxes_keep_index.append(index)
         if not len(scores_indexes):
             break
-        ious = compute_iou(boxes[index], boxes[scores_indexes], areas[index],
-                           areas[scores_indexes])
+        ious = compute_iou(boxes[index], boxes[scores_indexes], areas[index], areas[scores_indexes])
         filtered_indexes = set((ious > iou_threshold).nonzero()[0])
         all_filtered |= filtered_indexes
         # if there are no more scores_index
         # then we should pop it
-        scores_indexes = [
-            v for (i, v) in enumerate(scores_indexes)
-            if i not in filtered_indexes
-        ]
+        scores_indexes = [v for (i, v) in enumerate(scores_indexes) if i not in filtered_indexes]
 
     return np.array(boxes_keep_index)
-    
-
 
 
 def compute_iou(box, boxes, box_area, boxes_area):
@@ -150,16 +143,3 @@ def compute_iou(box, boxes, box_area, boxes_area):
     ious = intersections.astype(np.float32) / unions
 
     return ious
-
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    img = cv2.imread("test.png", cv2.IMREAD_UNCHANGED)
-    background = cv2.imread("background.jpg", cv2.IMREAD_UNCHANGED)
-
-    added_image = overlay_transparent(background, img, 0, 300)
-
-    plt.imshow(added_image)
-    plt.show()

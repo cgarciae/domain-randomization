@@ -4,5 +4,6 @@ dicto
 cytoolz
 numpy
 imgaug
+pillow
 tqdm
-git+https://github.com/cgarciae/pascal-voc-writer
+jinja2

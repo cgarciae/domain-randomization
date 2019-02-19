@@ -115,12 +115,12 @@ class RandomRotation90:
             for obj in collection.components_of(components.Object):
                 obj: components.Object
                 angle = np.random.choice(self.angles)
-                obj.image = dr.image_utils.rotate_bound(obj.image, angle)
+                obj.image = dr.utils.rotate_bound(obj.image, angle)
 
         if self.background:
             background = collection.first_component_of(components.Background)
             angle = np.random.choice(self.angles)
-            background.image = dr.image_utils.rotate_bound(background.image, angle)
+            background.image = dr.utils.rotate_bound(background.image, angle)
             
 
             
@@ -225,7 +225,7 @@ class ObjectRandomRotation:
                 high = self.angles[1],
             )
 
-            obj.image = dr.image_utils.rotate_bound(obj.image, angle)
+            obj.image = dr.utils.rotate_bound(obj.image, angle)
 
         return collection
 
@@ -245,7 +245,7 @@ class NonMaxSupression:
             for obj in objects
         ])
         scores = np.random.uniform(size = (len(boxes),))
-        valid_indexes = dr.image_utils.non_max_suppression(
+        valid_indexes = dr.utils.non_max_suppression(
             boxes = boxes,
             scores = scores,
             iou_threshold = self.iou_threshold,

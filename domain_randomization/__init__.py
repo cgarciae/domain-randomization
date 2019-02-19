@@ -1,12 +1,11 @@
-from . import image_utils
+from . import pascal_voc_writer
+from . import utils
 from . import components
-from .entity import Entity
-from .collection import Collection
+from . import transforms
+from . import collection
 
 # transforms
-from . import transforms
 from .transforms import *
-
-# object detection
-from . import object_detection
-from .object_detection import *
+from .entity import *
+from .collection import *
+from .components import *

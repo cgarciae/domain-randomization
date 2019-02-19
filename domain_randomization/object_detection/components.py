@@ -1,4 +1,4 @@
-from domain_randomization import image_utils
+from domain_randomization import utils
 from pascal_voc_writer import PascalVocWritter
 import uuid
 import typing
@@ -40,7 +40,7 @@ class PascalVoc:
 
 
         for obj in objects:
-            image = image_utils.overlay_transparent(
+            image = utils.overlay_transparent(
                 image,
                 obj.image,
                 obj.x,
@@ -59,7 +59,7 @@ class PascalVoc:
         image_path = os.path.join(save_dir,  f"{self.name}.{extension}")
         xml_path = os.path.join(save_dir,  f"{self.name}.xml")
 
-        image = image_utils.inv_chanels(self.image)
+        image = utils.inv_chanels(self.image)
         cv2.imwrite(image_path, image)
 
         with open(xml_path, mode = "w") as f:
