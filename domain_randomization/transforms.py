@@ -324,19 +324,28 @@ class ObjectRandomPosition:
             obj_h: int = obj.image.shape[0]
             obj_w: int = obj.image.shape[1]
 
-            obj.x = np.random.randint(
-                low=max(0, xmin),
-                high=min(
-                    max(image_w - obj_w, 1),
-                    xmax,
-                ),
+            low = max(0, xmin)
+            high = min(
+                max(image_w - obj_w, 1),
+                xmax,
             )
+            high = max(high, low + 1)
+
+            obj.x = np.random.randint(
+                low=low,
+                high=high,
+            )
+
+            low = max(0, ymin)
+            high = min(
+                max(image_h - obj_h, 1),
+                ymax,
+            )
+            high = max(high, low + 1)
+
             obj.y = np.random.randint(
-                low=max(0, ymin),
-                high=min(
-                    max(image_h - obj_h, 1),
-                    ymax,
-                ),
+                low=low,
+                high=high,
             )
 
         return row
