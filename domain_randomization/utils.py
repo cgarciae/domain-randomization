@@ -87,6 +87,10 @@ def overlay_transparent(background: np.ndarray, overlay: np.ndarray, mask: np.nd
 
 def non_max_suppression(boxes: np.ndarray, scores: np.ndarray, iou_threshold: float) -> np.ndarray:
     assert boxes.shape[0] == scores.shape[0]
+
+    if len(scores) == 0:
+        return np.array([])
+
     # bottom-left origin
     ys1 = boxes[:, 1]
     xs1 = boxes[:, 0]
