@@ -180,23 +180,24 @@ class RandomBrightness:
 
 
 class RandomChannelMultiply:
-    def __init__(self, objects=False, background=False, mult_range=(0.5, 2.0)):
-        self.objects = objects
-        self.background = background
-        self.mult_range = mult_range
+    def __init__(self, objects_range=None, background_range=None):
+        self.objects_range = objects_range
+        self.background_range = background_range
 
     def __call__(self, row: tp.Dict) -> tp.Dict:
         assert row, "row cannot be None"
 
-        augmenter: iaa.Augmenter = iaa.Multiply(mul=self.mult_range, per_channel=True)
+        if self.objects_range:
+            augmenter: iaa.Augmenter = iaa.Multiply(mul=self.objects_range, per_channel=True)
 
-        if self.objects:
             for obj in row["objects"]:
                 obj: components.Object
 
                 obj.image[..., :3] = augmenter.augment_image(obj.image[..., :3])
 
-        if self.background:
+        if self.background_range:
+            augmenter: iaa.Augmenter = iaa.Multiply(mul=self.background_range, per_channel=True)
+
             background = row["background"]
 
             background.image[..., :3] = augmenter.augment_image(background.image[..., :3])
