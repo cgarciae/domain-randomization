@@ -66,7 +66,7 @@ class PascalVoc:
 
 
 class Segmentation:
-    def __init__(self, background: Background, objects: typing.List[Object], debug=False):
+    def __init__(self, background: Background, objects: typing.List[Object], hist_match=False, debug=False):
 
         image = background.image.copy()
         labels = np.zeros(image.shape[:2], dtype=np.uint8)
@@ -81,6 +81,7 @@ class Segmentation:
                 mask=mask,
                 x=obj.x,
                 y=obj.y,
+                hist_match=hist_match,
             )
 
             label_overlay = (np.ones(overlay.shape[:2]) * (obj.label + 1)).astype(np.uint8)
