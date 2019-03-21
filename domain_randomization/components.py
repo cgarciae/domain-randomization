@@ -69,6 +69,7 @@ class Segmentation:
     def __init__(self,
                  background: Background,
                  objects: typing.List[Object],
+                 min_alpha=0,
                  hist_match=False,
                  min_object_brightness=0,
                  debug=False):
@@ -91,7 +92,7 @@ class Segmentation:
             )
 
             label_overlay = (np.ones(overlay.shape[:2]) * (obj.label + 1)).astype(np.uint8)
-            label_mask = ((mask > 0) * 255).astype(np.uint8)
+            label_mask = ((mask > min_alpha) * 255).astype(np.uint8)
 
             labels = utils.overlay_transparent(
                 background=labels,

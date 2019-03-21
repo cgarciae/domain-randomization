@@ -423,10 +423,11 @@ class GeneratePascalVoc:
 
 
 class GenerateSegmentation:
-    def __init__(self, debug, hist_match=False, min_object_brightness=0):
+    def __init__(self, debug, min_alpha=0, hist_match=False, min_object_brightness=0):
         self.debug = debug
         self.hist_match = hist_match
         self.min_object_brightness = min_object_brightness
+        self.min_alpha = min_alpha
 
     def __call__(self, row: tp.Dict) -> tp.Dict:
         assert row, "row cannot be None"
@@ -435,6 +436,7 @@ class GenerateSegmentation:
             background=row["background"],
             objects=row["objects"],
             hist_match=self.hist_match,
+            min_alpha=self.min_alpha,
             min_object_brightness=self.min_object_brightness,
             debug=self.debug,
         )
