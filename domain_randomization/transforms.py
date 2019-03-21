@@ -374,6 +374,20 @@ class ObjectRandomRotation:
         return row
 
 
+class ObjectRandomPiecewiseAffine:
+    def __init__(self, scale, nb_rows=4, nb_cols=4):
+        self.aug = iaa.PiecewiseAffine(scale=scale, nb_rows=nb_rows, nb_cols=nb_cols)
+
+    def __call__(self, row: tp.Dict) -> tp.Dict:
+        assert row, "row cannot be None"
+
+        for obj in row["objects"]:
+            obj: components.Object
+            obj.image = self.aug.augment_image(obj.image)
+
+        return row
+
+
 class NonMaxSupression:
     def __init__(self, iou_threshold):
         self.iou_threshold = iou_threshold
