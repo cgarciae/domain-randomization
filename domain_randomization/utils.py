@@ -49,8 +49,13 @@ def rotate_bound(image, angle):
     )
 
 
-def overlay_transparent(background: np.ndarray, overlay: np.ndarray, mask: np.ndarray, x: int, y: int,
-                        hist_match=False):
+def overlay_transparent(background: np.ndarray,
+                        overlay: np.ndarray,
+                        mask: np.ndarray,
+                        x: int,
+                        y: int,
+                        hist_match=False,
+                        min_object_brightness=0):
 
     background_width = background.shape[1]
     background_height = background.shape[0]
@@ -82,7 +87,7 @@ def overlay_transparent(background: np.ndarray, overlay: np.ndarray, mask: np.nd
         background = background[..., :3]
 
     if hist_match:
-        overlay = histogram_matching_h(overlay, background[y:y + h, x:x + w])
+        overlay = histogram_matching_h(overlay, background[y:y + h, x:x + w], min_v=min_object_brightness)
     background[y:y + h, x:x + w] = (1.0 - mask) * background[y:y + h, x:x + w] + mask * overlay
 
     return background
@@ -152,7 +157,7 @@ def compute_iou(box, boxes, box_area, boxes_area):
     return ious
 
 
-def histogram_matching_h(src, target):
+def histogram_matching_h(src, target, min_v=0):
     # http://vzaguskin.github.io/histmatching1/
     src_hsv = cv2.cvtColor(src[..., :3], cv2.COLOR_RGB2HSV)
     target_hsv = cv2.cvtColor(target[..., :3], cv2.COLOR_RGB2HSV)
@@ -168,6 +173,7 @@ def histogram_matching_h(src, target):
     interp1 = np.interp(src_hsv[:, :, 2].flatten(), bins[:-1], src_cdf)
     interp2 = np.interp(interp1, target_cdf, bins[:-1])
     src_hsv[:, :, 2] = interp2.reshape(src_hsv.shape[0], src_hsv.shape[1])
+    src_hsv[:, :, 2] = np.maximum(min_v, src_hsv[:, :, 2])
 
     res = src.copy()
     res[..., :3] = cv2.cvtColor(src_hsv, cv2.COLOR_HSV2RGB)
