@@ -23,8 +23,8 @@ class API:
             object_resize=None,
             background_resize=None,
             iou_threshold=0.0,
-            object_channel_multiply=False,
-            background_channel_multiply=False,
+            object_channel_multiply=(0.5, 1.5),
+            background_channel_multiply=(0.5, 1.5),
             object_channel_invert=False,
             background_channel_invert=False,
             background_rotate=False,
@@ -43,8 +43,8 @@ class API:
         # create transform
         transform = dr.Compose([
             dr.RandomChannelMultiply(
-                objects=object_channel_multiply,
-                background=background_channel_multiply,
+                objects_range=object_channel_multiply,
+                background_range=background_channel_multiply,
             ) if object_channel_multiply or background_channel_multiply else dr.NoOp(),
             dr.RandomChannelInvert(
                 objects=object_channel_invert,
